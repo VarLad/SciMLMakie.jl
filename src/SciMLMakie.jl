@@ -38,18 +38,18 @@ function Makie.plot!(solplot::SolPlot)
 	
 	tspan = haskey(solplot, :tspan) ? solplot.tspan[] : nothing
 	axis_safety = haskey(solplot, :axis_safety) ? solplot.axis_safety[] : 0.1
-    vars = haskey(solplot, :vars) ? solplot.vars[] : nothing
+    idxs = haskey(solplot, :idxs) ? solplot.idxs[] : nothing
 			
 	# Function implementation
 	
 	syms = SciMLBase.getsyms(sol)
-    int_vars = SciMLBase.interpret_vars(vars, sol, syms)
+    int_vars = SciMLBase.interpret_vars(idxs, sol, syms)
     strs = SciMLBase.cleansyms(syms)
     tscale = get(solplot.attributes, :xscale, :identity)
     
     plot_vecs, labs = SciMLBase.diffeq_to_arrays(sol, plot_analytic, denseplot,
 	                                         plotdensity, tspan, axis_safety,
-	                                         vars, int_vars, tscale, strs)
+	                                         idxs, int_vars, tscale, strs)
 
 	l = length(labs)
 	labs = Observable(labs)
@@ -83,7 +83,7 @@ function Makie.plot!(solplot::SolPlot)
 		gw = @lift $glowwidth isa AbstractVector ? $glowwidth[i] : $glowwidth
 		rot = @lift $rotations isa AbstractVector ? $rotations[i] : $rotations
 
-		if(vars != nothing)
+		if(idxs != nothing)
 			plot_type(solplot, hcat(plot_vecs...); color=series_color, label=label, linestyle = ls, transparency = transparent, linewidth = lw, overdraw = od, markersize = ms, strokewidth = sw, strokecolor = sc, glowwidth = gw, rotations = rot)
 		else
 			plot_type(solplot, plot_vecs[1][:,i], plot_vecs[2][:,i]; color=series_color, label=label, linestyle = ls, transparency = transparent, linewidth = lw, overdraw = od, markersize = ms, strokewidth = sw, strokecolor = sc, glowwidth = gw, rotations = rot)
@@ -96,11 +96,11 @@ function Makie.get_plots(plot::SolPlot)
 end
 
 function esolplot(sol::SciMLBase.AbstractTimeseriesSolution, plot_type = lines!; kwargs...)
-	vars = get(kwargs, :vars, nothing)
-	if haskey(kwargs, :vars) && length(vars) > 3
-		throw("length of vars can not be greater than 3")
+	idxs = get(kwargs, :idxs, nothing)
+	if haskey(kwargs, :idxs) && length(idxs) > 3
+		throw("length of idxs can not be greater than 3")
 	end
-	a = haskey(kwargs, :vars) && length(vars) == 3 ? Axis3 : Axis
+	a = haskey(kwargs, :idxs) && length(idxs) == 3 ? Axis3 : Axis
 	println(a)
 	f = Figure()
 	ax = f[1, 1] = a(f)
