@@ -1,0 +1,8 @@
+name = "SciMLMakie"
+uuid = "d83a7d3b-7de6-4a1b-af96-90cf5c16bc77"
+authors = ["Chetan Vardhan <chetan.verdhan8@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
