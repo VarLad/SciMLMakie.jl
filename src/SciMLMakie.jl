@@ -95,19 +95,39 @@ function Makie.get_plots(plot::SolPlot)
    	return plot.plots
 end
 
-function esolplot(sol::SciMLBase.AbstractTimeseriesSolution, plot_type = lines!; kwargs...)
+function axis_kwargs(;kwargs...)
+	return kwargs
+end
+
+function esolplot(sol::SciMLBase.AbstractTimeseriesSolution, plot_type = lines!; ax_kwargs = (), kwargs...)
 	idxs = get(kwargs, :idxs, nothing)
-	if haskey(kwargs, :idxs) && length(idxs) > 3
+	if !(isnothing(idxs)) && length(idxs) > 3
 		throw("length of idxs can not be greater than 3")
 	end
-	a = haskey(kwargs, :idxs) && length(idxs) == 3 ? Axis3 : Axis
-	println(a)
+	a = !(isnothing(idxs)) && length(idxs) == 3 ? Axis3 : Axis
+	label_find = if !isnothing(idxs)
+		xyzlk = [:xlabel, :ylabel]
+		xyzlv = ["", ""]
+		if length(idxs) == 3
+			push!(xyzlk, :zlabel)
+			push!(xyzlv, "")
+		end
+		if !isempty(findall(iszero, idxs))
+			for i in findall(iszero, idxs)
+				xyzlv[i] = "t"
+			end
+		end
+		xyzlk .=> xyzlv
+	else
+		[:xlabel] .=> ["t"]
+	end
 	f = Figure()
-	ax = f[1, 1] = a(f)
+	ax = f[1, 1] = a(f; label_find..., ax_kwargs...)
 	s = solplot!(sol, plot_type; kwargs...)
 	f[1, 1] = Legend(f, ax, "Legend", tellwidth = false, halign = 1.0, valign = 1.0)
 	f
 end
 
-export esolplot
+export esolplot, axis_kwargs
+
 end # module SciMLMakie
